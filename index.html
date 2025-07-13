@@ -5,24 +5,35 @@
   <title>My Stock Dashboard</title>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 50px;
       background-color: #f0f8ff;
     }
+
     h1 {
       color: #333;
+      margin-bottom: 30px;
     }
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
     a {
       display: inline-block;
-      margin: 20px;
       padding: 15px 25px;
       font-size: 18px;
       background-color: #007bff;
       color: white;
       text-decoration: none;
       border-radius: 8px;
+      transition: background-color 0.3s ease;
     }
+
     a:hover {
       background-color: #0056b3;
     }
@@ -31,9 +42,14 @@
 <body>
 
   <h1>📈 My Stock Pages</h1>
-  <a href="nifty200.html">Nifty 200 Report</a>
-  <a href="cash.html">Cash Report</a>
-  <a href="SST-N50.html">SST N50 Report</a> <!-- ✅ New button added -->
+
+  <div class="button-container">
+    <a href="nifty200.html">Nifty 200 Report</a>
+    <a href="cash.html">Cash Report</a>
+    <a href="SST-N50.html">SST N50 Report</a>
+    <a href="SST-N100.html">SST N100 Report</a>
+    <a href="SST-N200.html">SST N200 Report</a>
+  </div>
 
 </body>
 </html>
