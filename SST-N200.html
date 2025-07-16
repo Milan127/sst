@@ -43,54 +43,56 @@
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=881193201&single=true&output=csv';
 
     fetch(sheetUrl)
-    .then(res => res.text())
-    .then(csv => {
-      const rows = csv.trim().split('\n');
-      const table = document.getElementById('csvTable');
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.trim().split('\n');
+        const table = document.getElementById('csvTable');
 
-      rows.forEach((row, i) => {
-        const cols = row.split(',');
-        const tr = document.createElement('tr');
+        rows.forEach((row, i) => {
+          const cols = row.split(',');
+          const tr = document.createElement('tr');
 
-        cols.forEach((col, j) => {
-          const cell = document.createElement(i === 0 ? 'th' : 'td');
-          cell.textContent = col;
+          cols.forEach((col, j) => {
+            const cell = document.createElement(i < 3 ? 'th' : 'td');
+            cell.textContent = col.trim();
 
-          if (i !== 0) {
-            // % DIFF and P&L % columns (second last and last)
-            if (j === cols.length - 2 || j === cols.length - 1) {
-              const num = parseFloat(col);
-              if (!isNaN(num)) {
-                cell.style.fontWeight = 'bold';
-                cell.style.color = num > 0 ? 'green' : num < 0 ? 'red' : '';
+            if (i >= 3) {
+              const gttUpdateCol = 7;
+              const percentDiffCol = 5;
+              const pnlCol = 11;
+
+              if (j === percentDiffCol || j === pnlCol) {
+                const num = parseFloat(col);
+                if (!isNaN(num)) {
+                  cell.style.fontWeight = "bold";
+                  cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
+                }
+              }
+
+              if (j === gttUpdateCol) {
+                const val = col.trim().toUpperCase();
+                if (val === "TRIGGERED") {
+                  cell.style.backgroundColor = "#28a745";
+                  cell.style.color = "white";
+                  cell.style.fontWeight = "bold";
+                } else if (val === "YES") {
+                  cell.style.backgroundColor = "#ffc107";
+                  cell.style.color = "black";
+                  cell.style.fontWeight = "bold";
+                } else if (val === "NEW ADD") {
+                  cell.style.backgroundColor = "#007bff";
+                  cell.style.color = "white";
+                  cell.style.fontWeight = "bold";
+                }
               }
             }
 
-            // GTT UPDATE column = index 7
-            if (j === 7) {
-              const val = col.trim().toUpperCase();
-              if (val === 'TRIGGERED') {
-                cell.style.backgroundColor = '#28a745';
-                cell.style.color = '#fff';
-                cell.style.fontWeight = 'bold';
-              } else if (val === 'YES') {
-                cell.style.backgroundColor = '#fff3cd';
-                cell.style.color = '#000';
-                cell.style.fontWeight = 'bold';
-              } else if (val === 'NEW ADD') {
-                cell.style.backgroundColor = '#007bff';
-                cell.style.color = '#fff';
-                cell.style.fontWeight = 'bold';
-              }
-            }
-          }
+            tr.appendChild(cell);
+          });
 
-          tr.appendChild(cell);
+          table.appendChild(tr);
         });
-
-        table.appendChild(tr);
       });
-    });
   </script>
 </body>
 </html>
