@@ -18,6 +18,9 @@
       display: inline-block;
       margin-bottom: 20px;
     }
+    .table-container {
+      overflow-x: auto;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -28,14 +31,20 @@
       border: 1px solid #ccc;
       padding: 8px;
       text-align: center;
-      word-wrap: break-word;
       white-space: normal;
+      word-wrap: break-word;
     }
     th {
       background-color: #efefef;
     }
-    .green { color: green; font-weight: bold; }
-    .red { color: red; font-weight: bold; }
+    .green {
+      color: green;
+      font-weight: bold;
+    }
+    .red {
+      color: red;
+      font-weight: bold;
+    }
     .gtt-yes {
       background-color: #ffc107;
       color: black;
@@ -57,7 +66,8 @@
 
   <h1>📊 SST N50 Report</h1>
   <a href="index.html">⬅️ Back to Home</a>
-  <div style="overflow-x:auto;">
+
+  <div class="table-container">
     <table id="csvTable"></table>
   </div>
 
@@ -98,7 +108,7 @@
                 else if (val === "NEW ADD") cell.className = "gtt-new";
               }
 
-              if (j === 0) { // Ticker column
+              if (j === 0) {
                 const symbol = col.trim();
                 const a = document.createElement("a");
                 a.href = `https://www.tradingview.com/chart/?symbol=NSE:${symbol}`;
