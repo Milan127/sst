@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>SST N50 Report</title>
   <style>
     body {
@@ -9,30 +9,24 @@
       padding: 20px;
       background-color: #f9f9f9;
     }
-
     h1 {
       color: #333;
     }
-
     a {
       text-decoration: none;
       color: #0066cc;
       display: inline-block;
       margin-bottom: 20px;
     }
-
     .table-wrapper {
       overflow-x: auto;
+      display: block;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #fff;
-      table-layout: auto;
-      word-wrap: break-word;
     }
-
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
@@ -40,15 +34,11 @@
       white-space: normal;
       word-wrap: break-word;
     }
-
     th {
       background-color: #efefef;
     }
-
-    /* ✅ Reduce height for data rows from 4th row */
-    #csvTable tr:nth-child(n+4) td {
-      padding-top: 4px;
-      padding-bottom: 4px;
+    tr:nth-child(n+5) td {
+      padding: 4px 6px;
       font-size: 13px;
     }
   </style>
@@ -64,4 +54,69 @@
   <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
 
-    fetch(s
+    fetch(sheetUrl)
+      .then(res => res.text())
+      .then(csv => {
+        const rows = csv.trim().split('\n');
+        const table = document.getElementById('csvTable');
+
+        rows.forEach((row, i) => {
+          const cols = row.split(',');
+          const tr = document.createElement('tr');
+
+          cols.forEach((col, j) => {
+            const cell = document.createElement(i === 0 ? 'th' : 'td');
+            const content = col.trim();
+
+            // Link Ticker to TradingView
+            if (i >= 1 && j === 0) {
+              const link = document.createElement('a');
+              link.href = `https://www.tradingview.com/symbols/NSE-${content}/`;
+              link.target = "_blank";
+              link.textContent = content;
+              cell.appendChild(link);
+            } else {
+              cell.textContent = content;
+            }
+
+            if (i >= 1) {
+              const todayChangeCol = 6;
+              const percentDiffCol = 7;
+              const pnlCol = 12;
+              const gttUpdateCol = 8;
+
+              if ([todayChangeCol, percentDiffCol, pnlCol].includes(j)) {
+                const num = parseFloat(content);
+                if (!isNaN(num)) {
+                  cell.style.fontWeight = "bold";
+                  cell.style.color = num > 0 ? "green" : num < 0 ? "red" : "black";
+                }
+              }
+
+              if (j === gttUpdateCol) {
+                const val = content.toUpperCase();
+                if (val === "TRIGGERED") {
+                  cell.style.backgroundColor = "#28a745";
+                  cell.style.color = "white";
+                  cell.style.fontWeight = "bold";
+                } else if (val === "YES") {
+                  cell.style.backgroundColor = "#ffc107";
+                  cell.style.color = "black";
+                  cell.style.fontWeight = "bold";
+                } else if (val === "NEW ADD") {
+                  cell.style.backgroundColor = "#007bff";
+                  cell.style.color = "white";
+                  cell.style.fontWeight = "bold";
+                }
+              }
+            }
+
+            tr.appendChild(cell);
+          });
+
+          table.appendChild(tr);
+        });
+      });
+  </script>
+</body>
+</html>
