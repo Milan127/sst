@@ -54,23 +54,38 @@
 
           cols.forEach((col, j) => {
             const cell = document.createElement(i < 3 ? 'th' : 'td');
-            cell.textContent = col.trim();
+            const content = col.trim();
 
             if (i >= 3) {
-              const gttUpdateCol = 7;
-              const percentDiffCol = 5;
-              const pnlCol = 11;
+              const tickerCol = 0;
+              const todayChangeCol = 6;
+              const percentDiffCol = 7;
+              const gttUpdateCol = 8;
+              const pnlCol = 12;
 
-              if (j === percentDiffCol || j === pnlCol) {
-                const num = parseFloat(col);
+              // 🔗 Ticker hyperlink to TradingView
+              if (j === tickerCol && content !== '') {
+                const link = document.createElement('a');
+                link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
+                link.target = "_blank";
+                link.textContent = content;
+                cell.appendChild(link);
+                tr.appendChild(cell);
+                return;
+              }
+
+              // 📈 Color formatting for numeric columns
+              if (j === todayChangeCol || j === percentDiffCol || j === pnlCol) {
+                const num = parseFloat(content);
                 if (!isNaN(num)) {
                   cell.style.fontWeight = "bold";
                   cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
                 }
               }
 
+              // 🎨 GTT UPDATE highlight
               if (j === gttUpdateCol) {
-                const val = col.trim().toUpperCase();
+                const val = content.toUpperCase();
                 if (val === "TRIGGERED") {
                   cell.style.backgroundColor = "#28a745";
                   cell.style.color = "white";
@@ -85,6 +100,10 @@
                   cell.style.fontWeight = "bold";
                 }
               }
+            }
+
+            if (cell.childNodes.length === 0) {
+              cell.textContent = content;
             }
 
             tr.appendChild(cell);
