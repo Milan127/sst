@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>SST N50 Report</title>
   <style>
     body {
@@ -18,10 +18,6 @@
       display: inline-block;
       margin-bottom: 20px;
     }
-    .table-wrapper {
-      overflow-x: auto;
-      display: block;
-    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -29,17 +25,11 @@
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
-      white-space: normal;
-      word-wrap: break-word;
     }
     th {
       background-color: #efefef;
-    }
-    tr:nth-child(n+5) td {
-      padding: 4px 6px;
-      font-size: 13px;
     }
   </style>
 </head>
@@ -47,9 +37,7 @@
 
   <h1>📊 SST N50 Report</h1>
   <a href="index.html">⬅️ Back to Home</a>
-  <div class="table-wrapper">
-    <table id="csvTable"></table>
-  </div>
+  <table id="csvTable"></table>
 
   <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
@@ -65,34 +53,37 @@
           const tr = document.createElement('tr');
 
           cols.forEach((col, j) => {
-            const cell = document.createElement(i === 0 ? 'th' : 'td');
+            const cell = document.createElement(i < 3 ? 'th' : 'td');
             const content = col.trim();
 
-            // Link Ticker to TradingView
-            if (i >= 1 && j === 0) {
-              const link = document.createElement('a');
-              link.href = `https://www.tradingview.com/symbols/NSE-${content}/`;
-              link.target = "_blank";
-              link.textContent = content;
-              cell.appendChild(link);
-            } else {
-              cell.textContent = content;
-            }
-
-            if (i >= 1) {
+            if (i >= 3) {
+              const tickerCol = 0;
               const todayChangeCol = 6;
               const percentDiffCol = 7;
-              const pnlCol = 12;
               const gttUpdateCol = 8;
+              const pnlCol = 12;
 
-              if ([todayChangeCol, percentDiffCol, pnlCol].includes(j)) {
+              // 🔗 Ticker hyperlink to TradingView
+              if (j === tickerCol && content !== '') {
+                const link = document.createElement('a');
+                link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
+                link.target = "_blank";
+                link.textContent = content;
+                cell.appendChild(link);
+                tr.appendChild(cell);
+                return;
+              }
+
+              // 📈 TODAY CHANGE, % DIFF, P&L % color
+              if (j === todayChangeCol || j === percentDiffCol || j === pnlCol) {
                 const num = parseFloat(content);
                 if (!isNaN(num)) {
                   cell.style.fontWeight = "bold";
-                  cell.style.color = num > 0 ? "green" : num < 0 ? "red" : "black";
+                  cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
                 }
               }
 
+              // 🎨 GTT UPDATE highlight
               if (j === gttUpdateCol) {
                 const val = content.toUpperCase();
                 if (val === "TRIGGERED") {
@@ -109,6 +100,10 @@
                   cell.style.fontWeight = "bold";
                 }
               }
+            }
+
+            if (cell.childNodes.length === 0) {
+              cell.textContent = content;
             }
 
             tr.appendChild(cell);
