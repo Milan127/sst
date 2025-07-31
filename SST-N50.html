@@ -18,7 +18,7 @@
       display: inline-block;
       margin-bottom: 20px;
     }
-    .table-wrapper {
+    .scroll-table {
       overflow-x: auto;
       display: block;
     }
@@ -26,12 +26,17 @@
       width: 100%;
       border-collapse: collapse;
       background-color: #fff;
+      min-width: 1000px;
     }
     th, td {
       border: 1px solid #ccc;
-      padding: 8px;
+      padding: 10px;
       text-align: center;
       white-space: nowrap;
+    }
+    th:nth-child(-n+3),
+    td:nth-child(-n+3) {
+      white-space: normal;
     }
     th {
       background-color: #efefef;
@@ -42,7 +47,7 @@
 
   <h1>📊 SST N50 Report</h1>
   <a href="index.html">⬅️ Back to Home</a>
-  <div class="table-wrapper">
+  <div class="scroll-table">
     <table id="csvTable"></table>
   </div>
 
@@ -60,50 +65,45 @@
           const tr = document.createElement('tr');
 
           cols.forEach((col, j) => {
-            let cell = document.createElement(i < 1 ? 'th' : 'td');
-            let content = col.trim();
+            const cell = document.createElement(i < 3 ? 'th' : 'td');
+            const val = col.trim();
+            cell.textContent = val;
 
-            // Hyperlink for Ticker
-            if (i >= 1 && j === 0) {
-              const link = document.createElement('a');
-              link.href = `https://www.tradingview.com/symbols/NSE-${content}/`;
-              link.target = "_blank";
-              link.textContent = content;
-              cell.appendChild(link);
-            } else {
-              cell.textContent = content;
-            }
-
-            if (i >= 1) {
-              const todayChangeCol = 6;
-              const percentDiffCol = 7;
-              const pnlCol = 12;
-              const gttUpdateCol = 8;
-
-              if ([todayChangeCol, percentDiffCol, pnlCol].includes(j)) {
-                const num = parseFloat(content);
+            if (i >= 3) {
+              if (j === 6 || j === 7 || j === 12) {
+                const num = parseFloat(val);
                 if (!isNaN(num)) {
                   cell.style.fontWeight = "bold";
                   cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
                 }
               }
 
-              if (j === gttUpdateCol) {
-                const val = content.toUpperCase();
-                if (val === "TRIGGERED") {
+              if (j === 8) {
+                const upper = val.toUpperCase();
+                if (upper === "TRIGGERED") {
                   cell.style.backgroundColor = "#28a745";
                   cell.style.color = "white";
                   cell.style.fontWeight = "bold";
-                } else if (val === "YES") {
+                } else if (upper === "YES") {
                   cell.style.backgroundColor = "#ffc107";
                   cell.style.color = "black";
                   cell.style.fontWeight = "bold";
-                } else if (val === "NEW ADD") {
+                } else if (upper === "NEW ADD") {
                   cell.style.backgroundColor = "#007bff";
                   cell.style.color = "white";
                   cell.style.fontWeight = "bold";
                 }
               }
+            }
+
+            if (i >= 3 && j === 0) {
+              const link = `https://www.tradingview.com/chart/?symbol=NSE:${val}`;
+              const anchor = document.createElement('a');
+              anchor.href = link;
+              anchor.textContent = val;
+              anchor.target = "_blank";
+              cell.innerHTML = '';
+              cell.appendChild(anchor);
             }
 
             tr.appendChild(cell);
