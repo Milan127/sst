@@ -9,24 +9,30 @@
       padding: 20px;
       background-color: #f9f9f9;
     }
+
     h1 {
       color: #333;
     }
+
     a {
       text-decoration: none;
       color: #0066cc;
       display: inline-block;
       margin-bottom: 20px;
     }
-    .table-container {
+
+    .table-wrapper {
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #fff;
       table-layout: auto;
+      word-wrap: break-word;
     }
+
     th, td {
       border: 1px solid #ccc;
       padding: 8px;
@@ -34,31 +40,16 @@
       white-space: normal;
       word-wrap: break-word;
     }
+
     th {
       background-color: #efefef;
     }
-    .green {
-      color: green;
-      font-weight: bold;
-    }
-    .red {
-      color: red;
-      font-weight: bold;
-    }
-    .gtt-yes {
-      background-color: #ffc107;
-      color: black;
-      font-weight: bold;
-    }
-    .gtt-triggered {
-      background-color: #28a745;
-      color: white;
-      font-weight: bold;
-    }
-    .gtt-new {
-      background-color: #007bff;
-      color: white;
-      font-weight: bold;
+
+    /* ✅ Reduce height for data rows from 4th row */
+    #csvTable tr:nth-child(n+4) td {
+      padding-top: 4px;
+      padding-bottom: 4px;
+      font-size: 13px;
     }
   </style>
 </head>
@@ -66,65 +57,11 @@
 
   <h1>📊 SST N50 Report</h1>
   <a href="index.html">⬅️ Back to Home</a>
-
-  <div class="table-container">
+  <div class="table-wrapper">
     <table id="csvTable"></table>
   </div>
 
   <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
 
-    fetch(sheetUrl)
-      .then(res => res.text())
-      .then(csv => {
-        const rows = csv.trim().split('\n');
-        const table = document.getElementById('csvTable');
-
-        rows.forEach((row, i) => {
-          const cols = row.split(',');
-          const tr = document.createElement('tr');
-
-          cols.forEach((col, j) => {
-            const cell = document.createElement(i < 3 ? 'th' : 'td');
-            cell.textContent = col.trim();
-
-            if (i >= 3) {
-              const gttUpdateCol = 8;
-              const todayChangeCol = 6;
-              const percentDiffCol = 7;
-              const pnlCol = 12;
-
-              if ([todayChangeCol, percentDiffCol, pnlCol].includes(j)) {
-                const num = parseFloat(col);
-                if (!isNaN(num)) {
-                  cell.className = num > 0 ? "green" : (num < 0 ? "red" : "");
-                }
-              }
-
-              if (j === gttUpdateCol) {
-                const val = col.trim().toUpperCase();
-                if (val === "TRIGGERED") cell.className = "gtt-triggered";
-                else if (val === "YES") cell.className = "gtt-yes";
-                else if (val === "NEW ADD") cell.className = "gtt-new";
-              }
-
-              if (j === 0) {
-                const symbol = col.trim();
-                const a = document.createElement("a");
-                a.href = `https://www.tradingview.com/chart/?symbol=NSE:${symbol}`;
-                a.target = "_blank";
-                a.textContent = symbol;
-                cell.textContent = "";
-                cell.appendChild(a);
-              }
-            }
-
-            tr.appendChild(cell);
-          });
-
-          table.appendChild(tr);
-        });
-      });
-  </script>
-</body>
-</html>
+    fetch(s
