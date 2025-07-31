@@ -1,97 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>SST Report</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-    h1 {
-      color: #333;
-    }
-    a {
-      text-decoration: none;
-      color: #0066cc;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #fff;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 10px;
-      text-align: center;
-    }
-    th {
-      background-color: #efefef;
-    }
-  </style>
-</head>
-<body>
+<script>
+  const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
 
-  <h1>📊 SST N50 REPORT</h1>
-  <a href="index.html">⬅️ Back to Home</a>
-  <table id="csvTable"></table>
+  fetch(sheetUrl)
+    .then(res => res.text())
+    .then(csv => {
+      const rows = csv.trim().split('\n');
+      const table = document.getElementById('csvTable');
 
-  <script>
-    const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
+      rows.forEach((row, i) => {
+        const cols = row.split(',');
+        const tr = document.createElement('tr');
 
-    fetch(sheetUrl)
-      .then(res => res.text())
-      .then(csv => {
-        const rows = csv.trim().split('\n');
-        const table = document.getElementById('csvTable');
+        cols.forEach((col, j) => {
+          const cell = document.createElement(i < 3 ? 'th' : 'td');
+          const content = col.trim();
 
-        rows.forEach((row, i) => {
-          const cols = row.split(',');
-          const tr = document.createElement('tr');
+          if (i >= 3) {
+            const tickerCol = 0;
+            const todayChangeCol = 6;
+            const percentDiffCol = 7;
+            const gttUpdateCol = 8;
+            const pnlCol = 12;
 
-          cols.forEach((col, j) => {
-            const cell = document.createElement(i < 3 ? 'th' : 'td');
-            cell.textContent = col.trim();
+            // 🔗 Ticker to TradingView
+            if (j === tickerCol && content !== '') {
+              const link = document.createElement('a');
+              link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
+              link.target = "_blank";
+              link.textContent = content;
+              cell.appendChild(link);
+              tr.appendChild(cell);
+              return;
+            }
 
-            if (i >= 3) { // Only style data rows
-              const gttUpdateCol = 7;    // ✅ GTT UPDATE (8th column)
-              const percentDiffCol = 5;  // % DIFF (6th column)
-              const pnlCol = 11;         // P&L % (12th column)
-
-              if (j === percentDiffCol || j === pnlCol) {
-                const num = parseFloat(col);
-                if (!isNaN(num)) {
-                  cell.style.fontWeight = "bold";
-                  cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
-                }
-              }
-
-              if (j === gttUpdateCol) {
-                const val = col.trim().toUpperCase();
-                if (val === "TRIGGERED") {
-                  cell.style.backgroundColor = "#28a745";
-                  cell.style.color = "white";
-                  cell.style.fontWeight = "bold";
-                } else if (val === "YES") {
-                  cell.style.backgroundColor = "#ffc107";
-                  cell.style.color = "black";
-                  cell.style.fontWeight = "bold";
-                } else if (val === "NEW ADD") {
-                  cell.style.backgroundColor = "#007bff";
-                  cell.style.color = "white";
-                  cell.style.fontWeight = "bold";
-                }
+            // 📈 Color for TODAY CHANGE
+            if (j === todayChangeCol || j === percentDiffCol || j === pnlCol) {
+              const num = parseFloat(content);
+              if (!isNaN(num)) {
+                cell.style.fontWeight = "bold";
+                cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
               }
             }
 
-            tr.appendChild(cell);
-          });
+            // 🎨 GTT UPDATE color background
+            if (j === gttUpdateCol) {
+              const val = content.toUpperCase();
+              if (val === "TRIGGERED") {
+                cell.style.backgroundColor = "#28a745";
+                cell.style.color = "white";
+                cell.style.fontWeight = "bold";
+              } else if (val === "YES") {
+                cell.style.backgroundColor = "#ffc107";
+                cell.style.color = "black";
+                cell.style.fontWeight = "bold";
+              } else if (val === "NEW ADD") {
+                cell.style.backgroundColor = "#007bff";
+                cell.style.color = "white";
+                cell.style.fontWeight = "bold";
+              }
+            }
+          }
 
-          table.appendChild(tr);
+          if (cell.childNodes.length === 0) {
+            cell.textContent = content;
+          }
+
+          tr.appendChild(cell);
         });
+
+        table.appendChild(tr);
       });
-  </script>
-</body>
-</html>
+    });
+</script>
