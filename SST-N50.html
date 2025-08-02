@@ -45,63 +45,68 @@
     fetch(sheetUrl)
       .then(res => res.text())
       .then(csv => {
-        const rows = csv.trim().split('\n');
+        const rows = csv.trim().split('\n').map(row => row.split(','));
         const table = document.getElementById('csvTable');
 
+        // Detect header row (usually 3rd row)
+        const headerRowIndex = 2;
+        const headerRow = rows[headerRowIndex].map(h => h.trim().toUpperCase());
+
+        // Dynamic column index detection
+        const colIndexes = {
+          ticker: headerRow.findIndex(h => h === 'TICKER'),
+          todayChange: headerRow.findIndex(h => h.includes('TODAY CHANGE')),
+          percentDiff: headerRow.findIndex(h => h.includes('% DIFF')),
+          gttUpdate: headerRow.findIndex(h => h.includes('GTT UPDATE')),
+          pnl: headerRow.findIndex(h => h.includes('P&L'))
+        };
+
         rows.forEach((row, i) => {
-          const cols = row.split(',');
           const tr = document.createElement('tr');
 
-          cols.forEach((col, j) => {
-            const cell = document.createElement(i < 3 ? 'th' : 'td');
+          row.forEach((col, j) => {
             const content = col.trim();
+            const cell = document.createElement(i <= headerRowIndex ? 'th' : 'td');
 
-            if (i >= 3) {
-              const tickerCol = 0;
-              const todayChangeCol = 6;
-              const percentDiffCol = 7;
-              const gttUpdateCol = 8;
-              const pnlCol = 12;
+            // TradingView hyperlink for Ticker
+            if (i > headerRowIndex && j === colIndexes.ticker && content !== '') {
+              const link = document.createElement('a');
+              link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
+              link.target = "_blank";
+              link.textContent = content;
+              cell.appendChild(link);
+              tr.appendChild(cell);
+              return;
+            }
 
-              // 🔗 Ticker hyperlink to TradingView
-              if (j === tickerCol && content !== '') {
-                const link = document.createElement('a');
-                link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
-                link.target = "_blank";
-                link.textContent = content;
-                cell.appendChild(link);
-                tr.appendChild(cell);
-                return;
-              }
-
-              // 📈 TODAY CHANGE, % DIFF, P&L % color
-              if (j === todayChangeCol || j === percentDiffCol || j === pnlCol) {
-                const num = parseFloat(content);
-                if (!isNaN(num)) {
-                  cell.style.fontWeight = "bold";
-                  cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
-                }
-              }
-
-              // 🎨 GTT UPDATE highlight
-              if (j === gttUpdateCol) {
-                const val = content.toUpperCase();
-                if (val === "TRIGGERED") {
-                  cell.style.backgroundColor = "#28a745";
-                  cell.style.color = "white";
-                  cell.style.fontWeight = "bold";
-                } else if (val === "YES") {
-                  cell.style.backgroundColor = "#ffc107";
-                  cell.style.color = "black";
-                  cell.style.fontWeight = "bold";
-                } else if (val === "NEW ADD") {
-                  cell.style.backgroundColor = "#007bff";
-                  cell.style.color = "white";
-                  cell.style.fontWeight = "bold";
-                }
+            // Green/red color for numbers: Today Change, % Diff, P&L %
+            if (i > headerRowIndex && [colIndexes.todayChange, colIndexes.percentDiff, colIndexes.pnl].includes(j)) {
+              const num = parseFloat(content);
+              if (!isNaN(num)) {
+                cell.style.fontWeight = "bold";
+                cell.style.color = num > 0 ? "green" : num < 0 ? "red" : "black";
               }
             }
 
+            // Highlight GTT UPDATE
+            if (i > headerRowIndex && j === colIndexes.gttUpdate) {
+              const val = content.toUpperCase();
+              if (val === "TRIGGERED") {
+                cell.style.backgroundColor = "#28a745";
+                cell.style.color = "white";
+                cell.style.fontWeight = "bold";
+              } else if (val === "YES") {
+                cell.style.backgroundColor = "#ffc107";
+                cell.style.color = "black";
+                cell.style.fontWeight = "bold";
+              } else if (val === "NEW ADD") {
+                cell.style.backgroundColor = "#007bff";
+                cell.style.color = "white";
+                cell.style.fontWeight = "bold";
+              }
+            }
+
+            // Default content if not handled above
             if (cell.childNodes.length === 0) {
               cell.textContent = content;
             }
