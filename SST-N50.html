@@ -1,43 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>SST N50 Report</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       padding: 20px;
       background-color: #f9f9f9;
     }
+
     h1 {
-      color: #333;
+      color: #222;
     }
+
     a {
       text-decoration: none;
       color: #0066cc;
       display: inline-block;
       margin-bottom: 20px;
+      font-weight: bold;
     }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background-color: #fff;
+      min-width: 1000px;
     }
+
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
       padding: 10px;
       text-align: center;
+      font-size: 14px;
     }
+
     th {
-      background-color: #efefef;
+      background-color: #f2f2f2;
+      font-weight: bold;
+      color: #333;
+    }
+
+    tr:hover td {
+      background-color: #f9f9f9;
     }
   </style>
 </head>
 <body>
 
-  <h1>📊 SST N50 Report</h1>
+  <h1>📊 SST N50 REPORT</h1>
   <a href="index.html">⬅️ Back to Home</a>
-  <table id="csvTable"></table>
+
+  <div class="table-container">
+    <table id="csvTable"></table>
+  </div>
 
   <script>
     const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJoID6vuDnZN4q_-6Jj4MiG2yvF3u573bwPXbrfK2zW1WnIDfVVobFYOVDQydWH85eEHflBq2SMtlE/pub?gid=981225084&single=true&output=csv';
@@ -48,7 +71,7 @@
         const rows = csv.trim().split('\n').map(row => row.split(','));
         const table = document.getElementById('csvTable');
 
-        // Detect header row (usually 3rd row)
+        // Detect header row (3rd row index 2)
         const headerRowIndex = 2;
         const headerRow = rows[headerRowIndex].map(h => h.trim().toUpperCase());
 
@@ -68,27 +91,28 @@
             const content = col.trim();
             const cell = document.createElement(i <= headerRowIndex ? 'th' : 'td');
 
-            // TradingView hyperlink for Ticker
+            // Ticker hyperlink
             if (i > headerRowIndex && j === colIndexes.ticker && content !== '') {
               const link = document.createElement('a');
               link.href = `https://www.tradingview.com/chart/?symbol=NSE:${content}`;
               link.target = "_blank";
               link.textContent = content;
+              link.style.fontWeight = 'bold';
               cell.appendChild(link);
               tr.appendChild(cell);
               return;
             }
 
-            // Green/red color for numbers: Today Change, % Diff, P&L %
+            // Color coding for numeric columns
             if (i > headerRowIndex && [colIndexes.todayChange, colIndexes.percentDiff, colIndexes.pnl].includes(j)) {
               const num = parseFloat(content);
               if (!isNaN(num)) {
                 cell.style.fontWeight = "bold";
-                cell.style.color = num > 0 ? "green" : num < 0 ? "red" : "black";
+                cell.style.color = num > 0 ? "green" : (num < 0 ? "red" : "black");
               }
             }
 
-            // Highlight GTT UPDATE
+            // GTT UPDATE styling
             if (i > headerRowIndex && j === colIndexes.gttUpdate) {
               const val = content.toUpperCase();
               if (val === "TRIGGERED") {
@@ -106,7 +130,7 @@
               }
             }
 
-            // Default content if not handled above
+            // Default cell text
             if (cell.childNodes.length === 0) {
               cell.textContent = content;
             }
